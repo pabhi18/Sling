@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SLING File Server</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --dark-bg: #222831;
+            --medium-bg: #31363F;
+            --accent: #76ABAE;
+            --light: #EEEEEE;
+            --accent-light: #8ec5c9;
+            --accent-dark: #5a8c8f;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--light);
+            line-height: 1.7;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background-color: var(--medium-bg);
+            padding: 60px 30px;
+            position: relative;
+            text-align: center;
+            overflow: hidden;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(118, 171, 174, 0.15) 0%, rgba(118, 171, 174, 0) 70%);
+            z-index: 1;
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .logo {
+            margin-bottom: 15px;
+        }
+        
+        .logo-icon {
+            font-size: 3rem;
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--light);
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            background: linear-gradient(to right, var(--light) 30%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .header p {
+            font-size: 1rem;
+            font-weight: 300;
+            color: var(--light);
+            opacity: 0.85;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .path-info {
+            margin-top: 20px;
+            background-color: rgba(49, 54, 63, 0.6);
+            padding: 10px 20px;
+            border-radius: 30px;
+            display: inline-block;
+            border: 1px solid rgba(118, 171, 174, 0.3);
+        }
+        
+        .path-info i {
+            color: var(--accent);
+            margin-right: 8px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            flex: 1;
+        }
+        
+        .search-container {
+            max-width: 1000px;
+            margin: -30px auto 0;
+            padding: 0 20px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        form {
+            display: flex;
+            gap: 12px;
+            background-color: var(--medium-bg);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(118, 171, 174, 0.2);
+        }
+        
+        input[type="text"] {
+            flex: 1;
+            padding: 16px 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(118, 171, 174, 0.3);
+            background-color: rgba(34, 40, 49, 0.8);
+            color: var(--light);
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s ease;
+        }
+        
+        input[type="text"]::placeholder {
+            color: rgba(238, 238, 238, 0.6);
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(118, 171, 174, 0.25);
+        }
+        
+        button {
+            padding: 16px 30px;
+            background: var(--accent);
+            color: var(--dark-bg);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        button:hover {
+            background: var(--accent-light);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+        
+        h2 {
+            color: var(--accent);
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            font-weight: 600;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(118, 171, 174, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .file-list {
+            list-style-type: none;
+            padding: 0;
+            border-radius: 16px;
+            overflow: hidden;
+            background-color: var(--medium-bg);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(118, 171, 174, 0.2);
+        }
+        
+        .file-list li {
+            padding: 0;
+            margin: 1px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .file-list li:not(:last-child) {
+            border-bottom: 1px solid rgba(118, 171, 174, 0.15);
+        }
+        
+        .file-list li:hover {
+            background-color: rgba(118, 171, 174, 0.1);
+        }
+        
+        .file-list a {
+            text-decoration: none;
+            color: var(--light);
+            display: block;
+            padding: 18px 24px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .file-list a:before {
+            content: '\f15b';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 400;
+            color: var(--accent);
+            font-size: 1.2rem;
+        }
+        
+        .file-list a:hover {
+            color: var(--accent-light);
+            padding-left: 30px;
+        }
+        
+        .footer {
+            background-color: var(--medium-bg);
+            padding: 25px 20px;
+            text-align: center;
+            border-top: 1px solid rgba(118, 171, 174, 0.2);
+            margin-top: 30px;
+        }
+        
+        .footer-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .footer-text {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--light);
+            opacity: 0.8;
+            font-size: 0.95rem;
+        }
+        
+        .footer-text .heart {
+            color: #e25555;
+            animation: heartbeat 1.5s ease infinite;
+        }
+        
+        .github-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent);
+            text-decoration: none;
+            border: 1px solid rgba(118, 171, 174, 0.3);
+            padding: 8px 16px;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .github-link:hover {
+            background-color: rgba(118, 171, 174, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            25% { transform: scale(1.1); }
+            50% { transform: scale(1); }
+            75% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                padding: 40px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            form {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-server logo-icon"></i>
+            </div>
+            <h1>SLING</h1>
+            <p>Modern, Fast, Secure File Server</p>
+            <div class="path-info">
+                <i class="fas fa-folder-open"></i>
+                <span>{{.Path}}</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="search-container">
+        <form method="GET" action="/">
+            <input type="text" name="search" placeholder="Search for files..." value="{{.SearchQuery}}">
+            <button type="submit">
+                <i class="fas fa-search"></i>
+                Search
+            </button>
+        </form>
+    </div>
+    
+    <div class="container">
+        <h2><i class="fas fa-file-alt"></i> Files</h2>
+        <ul class="file-list">
+            {{range .Files}}
+                <li><a href="/{{.}}" download>{{.}}</a></li>
+            {{end}}
+        </ul>
+    </div>
+    
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-text">
+                <span>Made with</span>
+                <i class="fas fa-heart heart"></i>
+                <span>by Abhinav</span>
+            </div>
+            <a href="https://github.com/abhinav/sling" class="github-link" target="_blank">
+                <i class="fab fa-github"></i>
+                <span>View on GitHub</span>
+            </a>
+        </div>
+    </footer>
+</body>
+</html>
