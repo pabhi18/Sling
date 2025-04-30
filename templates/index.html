@@ -330,9 +330,9 @@
             </div>
         </div>
     </div>
-    
+
     <div class="search-container">
-        <form method="GET" action="/">
+        <form method="GET" action="{{.Path}}">
             <input type="text" name="search" placeholder="Search for files..." value="{{.SearchQuery}}">
             <button type="submit">
                 <i class="fas fa-search"></i>
@@ -340,16 +340,16 @@
             </button>
         </form>
     </div>
-    
+
     <div class="container">
         <h2><i class="fas fa-file-alt"></i> Files</h2>
         <ul class="file-list">
             {{range .Files}}
-                <li><a href="/{{.}}" download>{{.}}</a></li>
+            <li><a href="{{.URL}}">{{.Name}}</a></li>
             {{end}}
         </ul>
     </div>
-    
+
     <footer class="footer">
         <div class="footer-content">
             <div class="footer-text">
@@ -357,7 +357,7 @@
                 <i class="fas fa-heart heart"></i>
                 <span>by Abhinav</span>
             </div>
-            <a href="https://github.com/abhinav/sling" class="github-link" target="_blank">
+            <a href="https://github.com/pabhi18/Sling" class="github-link" target="_blank">
                 <i class="fab fa-github"></i>
                 <span>View on GitHub</span>
             </a>

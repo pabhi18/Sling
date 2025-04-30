@@ -40,82 +40,92 @@ func serveFolder(folderPath, port string) {
 
     fmt.Printf("Serving %s at http://localhost:%s and for Local Networks at http://%s:%s\n", folderPath, port, localIp, port)
 
-    // Load the HTML template
-    tmpl, err := template.ParseFiles("templates/index.html")
+    tmpl := "templates/index.html"
+
+	handler := CustomFileServer(http.Dir(folderPath), tmpl)
+
+	http.Handle("/", handler)
+
+    err := http.ListenAndServe(":"+port, nil)
     if err != nil {
-        fmt.Println("Error loading template:", err)
+        fmt.Println("Error starting server: ", err)
         os.Exit(1)
     }
+}
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		query := r.URL.Query().Get("search")
-		var files []string
-		var err error
-	
-		// If there's a search query, filter files
-		if query != "" {
-			files, err = searchFiles(folderPath, query)
-		} else {
-			files, err = getFilesInDir(folderPath)
-		}
-	
+func CustomFileServer(root http.FileSystem, templatePath string) http.Handler {
+	fs := http.FileServer(root)
+	tmpl := template.Must(template.ParseFiles(templatePath))
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		reqPath := filepath.Clean(r.URL.Path)
+
+		f, err := root.Open(reqPath)
 		if err != nil {
-			http.Error(w, "Error reading files", http.StatusInternalServerError)
+			http.Error(w, "File not found", http.StatusNotFound)
 			return
 		}
-	
-		data := struct {
-			Path  string
-			Files []string
-			SearchQuery string
-		}{
-			Path:       folderPath,
-			Files:      files,
-			SearchQuery: query,
-		}
-	
-		// Render the template
-		err = tmpl.Execute(w, data)
+		defer f.Close()
+
+		info, err := f.Stat()
 		if err != nil {
-			http.Error(w, "Error rendering template", http.StatusInternalServerError)
+			http.Error(w, "File not found", http.StatusNotFound)
+			return
 		}
+
+		if info.IsDir() {
+			entries, err := f.Readdir(-1)
+			if err != nil {
+				http.Error(w, "Error reading directory", http.StatusInternalServerError)
+				return
+			}
+
+			// Filtering by search query
+			searchQuery := r.URL.Query().Get("search")
+			files := []struct {
+				Name string
+				URL  string
+			}{}
+
+			for _, entry := range entries {
+				name := entry.Name()
+				if searchQuery != "" && !strings.Contains(strings.ToLower(name), strings.ToLower(searchQuery)) {
+					continue
+				}
+
+				linkPath := filepath.Join(reqPath, name)
+				linkPath = strings.TrimPrefix(linkPath, "/") // Avoid double slashes
+				files = append(files, struct {
+					Name string
+					URL  string
+				}{
+					Name: name,
+					URL:  "/" + strings.ReplaceAll(linkPath, "\\", "/"),
+				})
+			}
+
+			data := struct {
+				Path        string
+				Files       []struct {
+					Name string
+					URL  string
+				}
+				SearchQuery string
+			}{
+				Path:        r.URL.Path,
+				Files:       files,
+				SearchQuery: searchQuery,
+			}
+
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			if err := tmpl.Execute(w, data); err != nil {
+				http.Error(w, "Error rendering template", http.StatusInternalServerError)
+			}
+			return
+		}
+
+		fs.ServeHTTP(w, r)
 	})
-
-    err = http.ListenAndServe(":"+port, nil)
-    if err != nil {
-        fmt.Println("Error starting server:", err)
-        os.Exit(1)
-    }
-}
-
-func searchFiles(folderPath, query string) ([]string, error) {
-    var result []string
-    files, err := getFilesInDir(folderPath)
-    if err != nil {
-        return nil, err
-    }
-    for _, file := range files {
-        if strings.Contains(file, query) {
-            result = append(result, file)
-        }
-    }
-    return result, nil
-}
-
-
-
-func getFilesInDir(folderPath string) ([]string, error) {
-	var files []string
-	err := filepath.Walk(folderPath, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if !info.IsDir() {
-			files = append(files, path)
-		}
-		return nil
-	})
-	return files, err
 }
 
 func getIp() string {
