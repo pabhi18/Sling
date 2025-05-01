@@ -41,7 +41,7 @@ sling serve
 ### Serve a specific folder on a custom port
 
 ```bash
-sling serve -path ./your-folder -p 9090
+sling serve --path ./your-folder -p 9090
 ```
 
 - Replace `./your-folder` with the path you want to serve
