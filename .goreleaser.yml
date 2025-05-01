@@ -16,9 +16,3 @@ builds:
       - arm64
     goarm:
       - "7"
-
-archives:
-  - format: tar.gz
-    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
-    files:
-      - templates/**/*

@@ -38,8 +38,7 @@ func serveFolder(folderPath, port string) {
 	fmt.Printf("   ➤ Local Network:  http://%s:%s\n", localIp, port)
 	fmt.Printf("📁 Serving directory: %s\n", folderPath)
 
-	tmpl := "templates/index.html"
-	handler := server.CustomFileServer(http.Dir(folderPath), tmpl)
+	handler := server.CustomFileServer(http.Dir(folderPath))
 	http.Handle("/", handler)
 
 	err := http.ListenAndServe(":"+port, nil)
@@ -51,7 +50,6 @@ func serveFolder(folderPath, port string) {
 
 func init() {
 	rootCmd.AddCommand(serveCmd)
-
-	serveCmd.Flags().StringVarP(&path, "path", "p", ".", "Path to folder to serve")
-	serveCmd.Flags().StringVar(&port, "port", "8080", "Port to serve on")
+	serveCmd.Flags().StringVar(&path, "path", ".", "Path to folder to serve")
+	serveCmd.Flags().StringVarP(&port, "port", "p", "8080", "Port to serve on")
 }

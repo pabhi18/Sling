@@ -11,9 +11,12 @@ var version = "1.0.0"
 
 const logo = `
 
-▒█▀▀▀█ ▒█░░░ ▀█▀ ▒█▄░▒█ ▒█▀▀█ 
-░▀▀▀▄▄ ▒█░░░ ▒█░ ▒█▒█▒█ ▒█░▄▄ 
-▒█▄▄▄█ ▒█▄▄█ ▄█▄ ▒█░░▀█ ▒█▄▄█
+░██████╗██╗░░░░░██╗███╗░░██╗░██████╗░
+██╔════╝██║░░░░░██║████╗░██║██╔════╝░
+╚█████╗░██║░░░░░██║██╔██╗██║██║░░██╗░
+░╚═══██╗██║░░░░░██║██║╚████║██║░░╚██╗
+██████╔╝███████╗██║██║░╚███║╚██████╔╝
+╚═════╝░╚══════╝╚═╝╚═╝░░╚══╝░╚═════╝░
 `
 
 var rootCmd = &cobra.Command{
@@ -24,8 +27,8 @@ Sling is a lightweight CLI tool that allows you to serve any folder
 on your system as a local web server using HTTP.
 
 Examples:
-  sling serve -p . --port 3000     # Serve current folder on port 3000
-  sling serve --path ./site        # Serve 'site' folder on default port 8080
+  sling serve -path ./site --p 3000     # Serve 'site' folder on port 3000
+  sling serve        # Serve current folder on default port 8080
 
 Use 'sling serve --help' to see available options.
 `, logo),
