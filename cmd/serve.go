@@ -30,7 +30,7 @@ func serveFolder(folderPath, port string) {
 		os.Exit(1)
 	}
 
-	localIp := utils.getIp()
+	localIp := utils.GetIp()
 
 	fmt.Println("✅ Server started successfully!")
 	fmt.Println("🌐 Access URLs:")
