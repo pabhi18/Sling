@@ -1,33 +1,24 @@
 package server
 
 import (
-	"os"
-	"fmt"
-	"io/ioutil"
+	_ "embed"
 	"html/template"
 	"net/http"
 	"path/filepath"
 	"strings"
 )
 
+//go:embed templates/index.html
+var tmpltResp []byte
+
 func CustomFileServer(root http.FileSystem) http.Handler {
+	// Parse the template once when the handler is created
+	tmpl, err := template.New("index").Parse(string(tmpltResp))
+	if err != nil {
+		panic("failed to parse embedded template: " + err.Error())
+	}
+
 	fs := http.FileServer(root)
-
-	tmplURL := "https://raw.githubusercontent.com/pabhi18/Sling/main/templates/index.html"
-	tmplResp, err := http.Get(tmplURL)
-	if err != nil {
-		fmt.Printf("❌ Error fetching template: %v\n", err)
-		os.Exit(1)
-	}
-	defer tmplResp.Body.Close()
-
-	tmplContent, err := ioutil.ReadAll(tmplResp.Body)
-	if err != nil {
-		fmt.Printf("❌ Error reading template body: %v\n", err)
-		os.Exit(1)
-	}
-
-	tmpl, err := template.New("index").Parse(string(tmplContent))
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		reqPath := filepath.Clean(r.URL.Path)
@@ -77,10 +68,7 @@ func CustomFileServer(root http.FileSystem) http.Handler {
 
 			data := struct {
 				Path        string
-				Files       []struct {
-					Name string
-					URL  string
-				}
+				Files       []struct{ Name, URL string }
 				SearchQuery string
 			}{
 				Path:        r.URL.Path,
